@@ -566,7 +566,15 @@ else
 		echo "Downloading and unpacking the kernel source for $ARCHVERSION"
 		# Download source deb pkg
 		(dget -u "$url/${pkgname}/${dscname}" 2>&1) >> "$LOGFILE" || die "dget: Could not fetch/unpack $url/${pkgname}/${dscname}"
-		mv ${pkgname}-$KVER "$SRCDIR" || die
+		
+		if [[ $(cat /etc/debian_version) == "9.2" ]]; then
+			fileName92=$(cut -d "-" -f 1 <<< "${pkgname}_${pkgver}")
+			fileName92=${fileName92//_/-}
+			mv "$fileName92" "$SRCDIR" || die "mv: Could not mv ${fileName92}"
+		else
+			mv "${pkgname}_${pkgver}" "$SRCDIR" || die "mv: Could not mv ${pkgname}_${pkgver}"
+		fi
+
 		cp "/boot/config-${ARCHVERSION}" "$SRCDIR/.config" || die
 		if [[ "$ARCHVERSION" == *-* ]]; then
 			echo "-${ARCHVERSION#*-}" > "$SRCDIR/localversion" || die
